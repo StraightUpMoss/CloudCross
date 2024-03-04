@@ -1,0 +1,19 @@
+{
+  "Config": {
+    "To create saves follow the format": "{'FilePath:' 'Path', 'SaveName': 'worldName' (make this different from all other files), , 'Enabled': true/false}",
+
+
+    "BackupsPerWorld": 5,
+    "Worlds": [
+      {
+        "FilePath": "C:\\Users\\Liam Anson\\OneDrive - Geneva CUSD 304\\Old\\Desktop\\Forge Project\\GoogleDriveQuickstart\\src\\main\\resources\\WorldFile",
+        "SaveName": "WorldFile",
+        "Enabled":  true
+      },
+      {
+        "FilePath": "C:\\Users\\Liam Anson\\OneDrive - Geneva CUSD 304\\Old\\Desktop\\Forge Project\\GoogleDriveQuickstart\\src\\main\\resources\\BackupTest",
+        "SaveName": "OtherWorldFile",
+        "Enabled":  true
+   }]
+  }
+}
