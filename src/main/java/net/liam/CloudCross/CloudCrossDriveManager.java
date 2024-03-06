@@ -14,10 +14,11 @@ import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.FileList;
 
-import java.net.http.HttpRequest;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import net.minecraftforge.common.ForgeConfigSpec;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitResult;
@@ -62,6 +63,7 @@ public class CloudCrossDriveManager {
   private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT)
           throws IOException {
     // Load client secrets.
+
     InputStream in = CloudCrossDriveManager.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
     if (in == null) {
       throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH);
@@ -74,47 +76,61 @@ public class CloudCrossDriveManager {
             HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
             .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIRECTORY_PATH)))
             .setAccessType("offline")
+            .setApprovalPrompt("force")
             .build();
     LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
+
     Credential credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
+
+    //System.out.println(receiver.getRedirectUri());
     //returns an authorized Credential object.
     return credential;
   }
+  static NetHttpTransport transport = null;
+  static Drive service = null;
+
   public static void main(String... args) throws IOException, GeneralSecurityException {
+
+    InputStream iS = CloudCrossDriveManager.class.getResourceAsStream(CONFIG_FILE_PATH);
+    InputStreamReader fileReader = new InputStreamReader(iS, StandardCharsets.UTF_8);
+    JsonObject obj = (JsonObject) new JsonParser().parse(fileReader);
+    JsonObject config = (JsonObject) obj.get("Config");
+    if (!config.get("CCEnabled").getAsBoolean()) return;
     // Build a new authorized API client service.
-    final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-    Drive service = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
+    transport = GoogleNetHttpTransport.newTrustedTransport();
+    service = new Drive.Builder(transport, JSON_FACTORY, getCredentials(transport))
             .setApplicationName(APPLICATION_NAME)
             .build();
+
     System.out.println("Made it here");
-    GetUploadedFiles(service);
+    GetUploadedFiles();
     GatherConfigData();
     if(fileNames.isEmpty()) {
-      OrganizeDirectory(service, directory);
+      OrganizeDirectory(directory);
       System.out.println(fileNames);
     }
     else {
       System.out.println(fileNames);
     }
-    //UploadSubscribedFiles(service);
+    //UploadSubscribedFiles();
     //DownloadSubscribedFiles(service);
 
   }
   //Update to use the resumable upload maybe?
   //Add something that limits the amount of backup files/ same files
-  private static void UploadSubscribedFiles(Drive service) throws IOException{
+  public static void UploadSubscribedFiles() throws IOException{
     for (int i = 0; i < filesToUpload.size(); i++) {
       java.io.File f = filesToUpload.get(i);
       String worldName = worldNames.get(i);
       ZipFile(f.getAbsolutePath(),f.getAbsolutePath() + ".zip");
-      UploadFile(service, f.getAbsolutePath() + ".zip", worldName, "SAVES");
+      UploadFile(f.getAbsolutePath() + ".zip", worldName, "SAVES");
     }
   }
-  private static void DownloadSubscribedFiles(Drive service) throws IOException {
+  public static void DownloadSubscribedFiles() throws IOException {
     for (int i = 0; i < filesToUpload.size(); i++) {
       java.io.File f = filesToUpload.get(i);
       String worldName = worldNames.get(i);
-      DownloadFile(service, GetMostRecentBackupId(worldName), f.getAbsolutePath() +".zip", true);
+      DownloadFile(GetMostRecentBackupId(worldName), f.getAbsolutePath() +".zip", true);
     }
   }
   public static void UploadFileFromMC(String absolutePath) throws IOException, GeneralSecurityException {
@@ -126,7 +142,7 @@ public class CloudCrossDriveManager {
           Drive service = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
                   .setApplicationName(APPLICATION_NAME)
                   .build();
-          UploadFile(service, absolutePath, worldNames.get(i), "SAVES");
+          UploadFile(absolutePath, worldNames.get(i), "SAVES");
           return;
         }
       }
@@ -139,7 +155,7 @@ public class CloudCrossDriveManager {
       System.err.println("Security error: " + e);
     }
   }
-  private static void UploadFile(Drive service, String absolutePath, String SaveName, String destinationFolderName) throws IOException {
+  private static void UploadFile(String absolutePath, String SaveName, String destinationFolderName) throws IOException {
     int backupCount = 0;
     for(String s : fileNames) {
       if(s.length() > SavePrefix.length() && s.substring(SavePrefix.length(), s.length()-2).equals(SaveName)) backupCount ++;
@@ -163,7 +179,7 @@ public class CloudCrossDriveManager {
           //System.out.println(fileNames.get(s));
         }
       }
-      UploadFile(service, absolutePath, SaveName, destinationFolderName);
+      UploadFile(absolutePath, SaveName, destinationFolderName);
     }
     //create new backup or fresh file
     else {
@@ -187,7 +203,7 @@ public class CloudCrossDriveManager {
       System.out.println("File Uploaded");
     }
   }
-  private static void DownloadFile(Drive service, String fileId, String outputDirectory) throws IOException {
+  private static void DownloadFile(String fileId, String outputDirectory) throws IOException {
     try {
       OutputStream writeStream = new FileOutputStream(outputDirectory);
       service.files().get(fileId)
@@ -202,7 +218,7 @@ public class CloudCrossDriveManager {
       throw e;
     }
   }
-  private static void DownloadFile(Drive service, String fileId, String outputDirectory, boolean unzip) throws IOException {
+  private static void DownloadFile(String fileId, String outputDirectory, boolean unzip) throws IOException {
     try {
       OutputStream writeStream = new FileOutputStream(outputDirectory);
       service.files().get(fileId)
@@ -264,7 +280,7 @@ public class CloudCrossDriveManager {
     zipInputStream.close();
     System.out.println("File unzipped");
   }
-  private static List<com.google.api.services.drive.model.File> GetUploadedFiles(Drive service) throws IOException {
+  private static List<com.google.api.services.drive.model.File> GetUploadedFiles() throws IOException {
     FileList result = service.files().list()
             .setPageSize(25)
             .setFields("nextPageToken, files(id, name)")
@@ -290,16 +306,16 @@ public class CloudCrossDriveManager {
     }
     return destinationFile;
   }
-  private static void OrganizeDirectory(Drive service, String[] directoryPath) throws IOException {
-    String parentDirectory = CreateFolder(service, directoryPath[0], "");
+  private static void OrganizeDirectory(String[] directoryPath) throws IOException {
+    String parentDirectory = CreateFolder(directoryPath[0], "");
     String finalPath = null;
     for(int i = 1; i < directoryPath.length; i++) {
       //System.out.println(parentDirectory);
-      finalPath = CreateFolder(service, directoryPath[i], parentDirectory);
+      finalPath = CreateFolder(directoryPath[i], parentDirectory);
     }
    // return finalPath;
   }
-  private static String CreateFolder(Drive service, String folderName, String parentFolderId) throws IOException {
+  private static String CreateFolder(String folderName, String parentFolderId) throws IOException {
     com.google.api.services.drive.model.File fileMetaData = new com.google.api.services.drive.model.File();
     fileMetaData.setName(folderName);
     fileMetaData.setMimeType("application/vnd.google-apps.folder");
@@ -366,10 +382,15 @@ public class CloudCrossDriveManager {
     JsonArray worldArr = (JsonArray) config.get("Worlds");
     for(Object j: worldArr) {
       JsonObject jObj = (JsonObject) j;
-      String path = jObj.get("FilePath").getAsString();
-      String worldName = jObj.get("SaveName").getAsString();
-      if (jObj.get("Enabled").getAsBoolean()) AddFileToUploadList(path, worldName);
-      else System.out.println("Save disabled for world with path: " + worldName);
+      try {
+        String path = jObj.get("FilePath").getAsString();
+        String worldName = jObj.get("SaveName").getAsString();
+        if (jObj.get("Enabled").getAsBoolean()) AddFileToUploadList(path, worldName);
+        else System.out.println("Save disabled for world with path: " + worldName);
+      }
+      catch(Exception e) {
+        System.out.println("Config object not complete");
+      }
     }
 
     //System.out.println(worldArr);

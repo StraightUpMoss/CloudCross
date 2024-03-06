@@ -2,6 +2,7 @@ package net.liam.CloudCross;
 
 
 import com.mojang.logging.LogUtils;
+import net.minecraft.client.telemetry.events.WorldUnloadEvent;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
@@ -12,14 +13,18 @@ import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
+import net.minecraftforge.eventbus.api.Event;
 
+//import net.minecraftforge.data.
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
@@ -37,7 +42,7 @@ public class CloudCross
 
     public CloudCross()
     {
-
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, CloudCrossConfig.SPEC, "CloudCross.toml");
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
         // Register the commonSetup method for modloading
@@ -66,6 +71,7 @@ public class CloudCross
         //LOGGER.info("HELLO FROM COMMON SETUP");
         try {
             CloudCrossDriveManager.main();
+            CloudCrossDriveManager.DownloadSubscribedFiles();
         }
         catch (IOException ioException){
             System.err.println(ioException);
@@ -73,6 +79,7 @@ public class CloudCross
         catch(GeneralSecurityException generalSecurityException) {
             System.err.println((generalSecurityException));
         }
+
     }
 
     // Add the example block item to the building blocks tab
@@ -112,8 +119,9 @@ public class CloudCross
     @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
     public static class ForgeModEvents {
         @SubscribeEvent
-        public static void onGameShutown(GameShuttingDownEvent event) {
+        public static void onGameShutown(GameShuttingDownEvent event) throws IOException {
             //Called on game close
+            CloudCrossDriveManager.UploadSubscribedFiles();
             LOGGER.info("GAME SHUT DOWN");
         }
         @SubscribeEvent
@@ -121,17 +129,11 @@ public class CloudCross
             //Called everytime host hits escape so might not be best
             LOGGER.info("Saved new chunk");
         }
-        @SubscribeEvent
-        public static void OnAutoSave(PlayerEvent.SaveToFile event) throws GeneralSecurityException, IOException {
-            String filePath = event.getPlayerDirectory().getParentFile().getAbsolutePath();
-            LOGGER.info(filePath);
-            //CloudCrossDriveManager.UploadFileFromMC(filePath);
-        }
-        @SubscribeEvent
-        public static void OnServerShutdown(ServerStoppedEvent event) {
 
+        @SubscribeEvent
+        public static void OnServerShutdown(ServerStoppedEvent event) throws IOException {
             LOGGER.info("SERVER STOPPED");
-            //CloudCrossDriveManager.UploadFile();
+            //CloudCrossDriveManager.UploadSubscribedFiles();
         }
     }
 
