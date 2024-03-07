@@ -95,7 +95,8 @@ public class CloudCrossDriveManager {
     InputStreamReader fileReader = new InputStreamReader(iS, StandardCharsets.UTF_8);
     JsonObject obj = (JsonObject) new JsonParser().parse(fileReader);
     JsonObject config = (JsonObject) obj.get("Config");
-    if (!config.get("CCEnabled").getAsBoolean()) return;
+    if(!CloudCrossConfig.ccEnabled.get()) return;
+    //if (!config.get("CCEnabled").getAsBoolean()) return;
     // Build a new authorized API client service.
     transport = GoogleNetHttpTransport.newTrustedTransport();
     service = new Drive.Builder(transport, JSON_FACTORY, getCredentials(transport))
@@ -104,7 +105,7 @@ public class CloudCrossDriveManager {
 
     System.out.println("Made it here");
     GetUploadedFiles();
-    GatherConfigData();
+    GatherConfigData(true);
     if(fileNames.isEmpty()) {
       OrganizeDirectory(directory);
       System.out.println(fileNames);
@@ -127,10 +128,15 @@ public class CloudCrossDriveManager {
     }
   }
   public static void DownloadSubscribedFiles() throws IOException {
-    for (int i = 0; i < filesToUpload.size(); i++) {
-      java.io.File f = filesToUpload.get(i);
-      String worldName = worldNames.get(i);
-      DownloadFile(GetMostRecentBackupId(worldName), f.getAbsolutePath() +".zip", true);
+    try {
+      for (int i = 0; i < filesToUpload.size(); i++) {
+        java.io.File f = filesToUpload.get(i);
+        String worldName = worldNames.get(i);
+        DownloadFile(GetMostRecentBackupId(worldName), f.getAbsolutePath() + ".zip", true);
+      }
+    }
+    catch (Exception e) {
+      System.out.println("World with name not uploaded yet");
     }
   }
   public static void UploadFileFromMC(String absolutePath) throws IOException, GeneralSecurityException {
@@ -392,7 +398,18 @@ public class CloudCrossDriveManager {
         System.out.println("Config object not complete");
       }
     }
-
     //System.out.println(worldArr);
+  }
+  private static void GatherConfigData(Boolean useToml) {
+    for(int i = 0; i < CloudCrossConfig.worldPaths.get().size(); i++) {
+      try {
+        if (CloudCrossConfig.enabled.get().get(i)) AddFileToUploadList(CloudCrossConfig.worldPaths.get().get(i),
+                CloudCrossConfig.worldNames.get().get(i));
+        else System.out.println("Save disabled for world with path" + CloudCrossConfig.worldPaths.get().get(i));
+      }
+      catch (Exception e) {
+        System.out.println("Config not complete or incorrect");
+      }
+    }
   }
 }

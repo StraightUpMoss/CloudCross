@@ -33,6 +33,7 @@ import java.security.GeneralSecurityException;
 public class CloudCross
 {
     // Define mod id in a common place for everything to reference
+
     public static final String MODID = "cloudcross";
     // Directly reference a slf4j logger
     private static final Logger LOGGER = LogUtils.getLogger();
