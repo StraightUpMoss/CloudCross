@@ -1,0 +1,16 @@
+{
+  "Config": {
+    "To create saves follow the format": "{'FilePath:' 'Path', 'SaveName': 'worldName' (make this different from all other files), , 'Enabled': true/false}",
+    "Open this link before running minecraft with CC enabled for the first time then select your account when you get stuck in loading.": "https://accounts.google.com/o/oauth2/auth/oauthchooseaccount?access_type=offline&approval_prompt=force&client_id=67117034265-fpgd27545uvujcgpqcma6b99o0bph26j.apps.googleusercontent.com&redirect_uri=http%3A%2F%2Flocalhost%3A8888%2FCallback&response_type=code&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive.file&service=lso&o2v=1&theme=glif&flowName=GeneralOAuthFlow",
+    "CCEnabled": false,
+    "BackupsPerWorld": 5,
+
+    "Worlds": [
+      {
+        "FilePath": "C:\\Users\\Liam Anson\\OneDrive - Geneva CUSD 304\\Old\\Desktop\\Forge Project\\forge-1.20.2-48.1.0-mdk\\run\\saves\\New World",
+        "SaveName": "OtherWorldFile",
+        "Enabled": true
+      }
+    ]
+  }
+}

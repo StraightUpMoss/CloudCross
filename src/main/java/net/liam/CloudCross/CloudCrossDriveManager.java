@@ -387,6 +387,7 @@ public class CloudCrossDriveManager {
 
     return FindFileIdFromName(SavePrefix + name + "_"+latestBackup);
   }
+  /*
   private static void GatherConfigData() throws IOException {
     //Find a way to read world data from config.json and find a way to make paths relative to this file
     InputStream iS = CloudCrossDriveManager.class.getResourceAsStream(CONFIG_FILE_PATH);
@@ -409,6 +410,8 @@ public class CloudCrossDriveManager {
     }
     //System.out.println(worldArr);
   }
+
+   */
   private static void GatherConfigData(Boolean useToml) {
     for(int i = 0; i < CloudCrossConfig.worldPaths.get().size(); i++) {
       try {
