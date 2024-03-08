@@ -2,6 +2,8 @@ package net.liam.CloudCross;
 
 
 import com.mojang.logging.LogUtils;
+import net.minecraft.CrashReport;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.telemetry.events.WorldUnloadEvent;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.api.distmarker.Dist;
@@ -22,6 +24,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
+
 import net.minecraftforge.eventbus.api.Event;
 
 //import net.minecraftforge.data.
@@ -70,8 +73,10 @@ public class CloudCross
     private void commonSetup(final FMLCommonSetupEvent event)  {
         // Some common setup code
         //LOGGER.info("HELLO FROM COMMON SETUP");
+
         try {
-            CloudCrossDriveManager.main();
+
+            CloudCrossDriveManager.Start();
             CloudCrossDriveManager.DownloadSubscribedFiles();
         }
         catch (IOException ioException){
@@ -82,7 +87,6 @@ public class CloudCross
         }
 
     }
-
     // Add the example block item to the building blocks tab
     /*private void addCreative(BuildCreativeModeTabContentsEvent event)
     {
@@ -122,20 +126,16 @@ public class CloudCross
         @SubscribeEvent
         public static void onGameShutown(GameShuttingDownEvent event) throws IOException {
             //Called on game close
-            CloudCrossDriveManager.UploadSubscribedFiles();
+            //CloudCrossDriveManager.UploadSubscribedFiles();
             LOGGER.info("GAME SHUT DOWN");
         }
         @SubscribeEvent
-        public static void LevelEvent(LevelEvent.Save event) {
-            //Called everytime host hits escape so might not be best
-            LOGGER.info("Saved new chunk");
-        }
-
-        @SubscribeEvent
         public static void OnServerShutdown(ServerStoppedEvent event) throws IOException {
             LOGGER.info("SERVER STOPPED");
-            //CloudCrossDriveManager.UploadSubscribedFiles();
+            CloudCrossDriveManager.UploadSubscribedFiles();
         }
+        //public static void OnWorldSave(WorldEvent.Save event)
+
     }
 
 }

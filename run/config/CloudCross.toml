@@ -3,6 +3,8 @@
 	#For first time setup make sure you launch minecraft with this link: https://accounts.google.com/o/oauth2/auth/oauthchooseaccount?access_type=offline&approval_prompt=force&client_id=67117034265-fpgd27545uvujcgpqcma6b99o0bph26j.apps.googleusercontent.com&redirect_uri=http%3A%2F%2Flocalhost%3A8888%2FCallback&response_type=code&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive.file&service=lso&o2v=1&theme=glif&flowName=GeneralOAuthFlow 
 	# Once the loading process stops for a sec login and accept required scopes
 	# If you want to change account delete the StoredCredential file in tokens
+	#If you have worlds set to upload make sure you quit to main menu and allow CC time to upload your file. 
+	#If your game crashes all worlds configured to auto save will stop doing so until you re-enable them!
 	#
 	#
 	#
@@ -20,5 +22,7 @@
 	"World Names" = ["NewConfigTest"]
 	#Do you want this file to be uploaded and downloaded using CC 
 	#true/false
-	"World Status" = [true]
+	"World Status" = [false]
+	#DO NOT EDIT THIS. It's used to ensure that files are not overridden.
+	"Most recent crash" = "crash-2024-03-07_12.59.32-fml.txt"
 

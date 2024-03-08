@@ -20,6 +20,7 @@ import com.google.gson.JsonParser;
 import net.minecraftforge.common.ForgeConfigSpec;
 
 import java.io.*;
+import java.lang.reflect.Executable;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -49,7 +50,7 @@ public class CloudCrossDriveManager {
   private static final String[] directory = new String[]{"CLOUDCROSS", "SAVES"};
   private static final List<String> fileNames = new ArrayList<String>();
   private static final List<String> fileIds = new ArrayList<String>();
-  private static final List<java.io.File> filesToUpload = new ArrayList<java.io.File>();
+  private static final List<File> filesToUpload = new ArrayList<File>();
   private static final List<String> worldNames = new ArrayList<>();
   private static int fileBackupLimit = 5;
   private static final GsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
@@ -74,7 +75,7 @@ public class CloudCrossDriveManager {
     // Build flow and trigger user authorization request.
     GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
             HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
-            .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIRECTORY_PATH)))
+            .setDataStoreFactory(new FileDataStoreFactory(new File(TOKENS_DIRECTORY_PATH)))
             .setAccessType("offline")
             .setApprovalPrompt("force")
             .build();
@@ -89,12 +90,19 @@ public class CloudCrossDriveManager {
   static NetHttpTransport transport = null;
   static Drive service = null;
 
-  public static void main(String... args) throws IOException, GeneralSecurityException {
-
+  public static void Start() throws IOException, GeneralSecurityException {
+  /*
     InputStream iS = CloudCrossDriveManager.class.getResourceAsStream(CONFIG_FILE_PATH);
     InputStreamReader fileReader = new InputStreamReader(iS, StandardCharsets.UTF_8);
     JsonObject obj = (JsonObject) new JsonParser().parse(fileReader);
     JsonObject config = (JsonObject) obj.get("Config");
+
+   */
+    String MostRecentCrash = GetMostRecentCrash();
+    if(!CloudCrossConfig.savedCrash.get().equals(MostRecentCrash) && !MostRecentCrash.isEmpty()) {
+      CloudCrossConfig.ccEnabled.set(false);
+      CloudCrossConfig.savedCrash.set(MostRecentCrash);
+    }
     if(!CloudCrossConfig.ccEnabled.get()) return;
     //if (!config.get("CCEnabled").getAsBoolean()) return;
     // Build a new authorized API client service.
@@ -104,6 +112,7 @@ public class CloudCrossDriveManager {
             .build();
 
     System.out.println("Made it here");
+
     GetUploadedFiles();
     GatherConfigData(true);
     if(fileNames.isEmpty()) {
@@ -121,7 +130,7 @@ public class CloudCrossDriveManager {
   //Add something that limits the amount of backup files/ same files
   public static void UploadSubscribedFiles() throws IOException{
     for (int i = 0; i < filesToUpload.size(); i++) {
-      java.io.File f = filesToUpload.get(i);
+      File f = filesToUpload.get(i);
       String worldName = worldNames.get(i);
       ZipFile(f.getAbsolutePath(),f.getAbsolutePath() + ".zip");
       UploadFile(f.getAbsolutePath() + ".zip", worldName, "SAVES");
@@ -130,7 +139,7 @@ public class CloudCrossDriveManager {
   public static void DownloadSubscribedFiles() throws IOException {
     try {
       for (int i = 0; i < filesToUpload.size(); i++) {
-        java.io.File f = filesToUpload.get(i);
+        File f = filesToUpload.get(i);
         String worldName = worldNames.get(i);
         DownloadFile(GetMostRecentBackupId(worldName), f.getAbsolutePath() + ".zip", true);
       }
@@ -142,7 +151,7 @@ public class CloudCrossDriveManager {
   public static void UploadFileFromMC(String absolutePath) throws IOException, GeneralSecurityException {
     try {
       for (int i = 0; i < filesToUpload.size(); i++) {
-        java.io.File file = filesToUpload.get(i);
+        File file = filesToUpload.get(i);
         if (file.getAbsolutePath() == absolutePath) {
           final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
           Drive service = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
@@ -193,7 +202,7 @@ public class CloudCrossDriveManager {
       com.google.api.services.drive.model.File fileMetaData = new com.google.api.services.drive.model.File();
       fileMetaData.setName(SavePrefix + SaveName + "_" + backupCount);
       //java.io.File filePath = new java.io.File(ZIP_FILE_PATH);
-      java.io.File filePath = new java.io.File(absolutePath);
+      File filePath = new File(absolutePath);
       FileContent mediaContent = new FileContent("application/zip", filePath);
       fileMetaData.setParents(Collections.singletonList(FindFileIdFromName(destinationFolderName)));
       try {
@@ -241,7 +250,7 @@ public class CloudCrossDriveManager {
 
   }
   private static void ZipFile(String source, String destination) throws IOException {
-    java.io.File sourceDirectory = new java.io.File(source);
+    File sourceDirectory = new File(source);
     FileOutputStream fileOutputStream = new FileOutputStream(destination);
     ZipOutputStream zipOutputStream = new ZipOutputStream(fileOutputStream);
     Files.walkFileTree(sourceDirectory.toPath(), new SimpleFileVisitor<Path>() {
@@ -258,18 +267,18 @@ public class CloudCrossDriveManager {
   }
   private static void UnzipFile(String source, String destination) throws IOException {
     byte[] buffer = new byte[1024];
-    java.io.File destinationFolder = new java.io.File(destination);
+    File destinationFolder = new File(destination);
     ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(source));
     ZipEntry zipEntry = zipInputStream.getNextEntry();
     while (zipEntry != null) {
-      java.io.File newFile = newFile(destinationFolder,zipEntry);
+      File newFile = newFile(destinationFolder,zipEntry);
       if (zipEntry.isDirectory()) {
         if (newFile.isDirectory() && !newFile.mkdirs()) {
           throw new IOException("Failed to create directory: " + newFile);
         }
       }
       else {
-        java.io.File parent = newFile.getParentFile();
+        File parent = newFile.getParentFile();
         if(!parent.isDirectory() && !parent.mkdirs()) {
           throw new IOException("Failed to create directory: " + parent);
         }
@@ -303,11 +312,11 @@ public class CloudCrossDriveManager {
     }
     return files;
   }
-  private static java.io.File newFile(java.io.File destination, ZipEntry zipEntry) throws IOException {
-    java.io.File destinationFile = new java.io.File(destination, zipEntry.getName());
+  private static File newFile(File destination, ZipEntry zipEntry) throws IOException {
+    File destinationFile = new File(destination, zipEntry.getName());
     String destinationDirPath = destination.getCanonicalPath();
     String destinationFilePath = destinationFile.getCanonicalPath();
-    if(!destinationFilePath.startsWith(destinationDirPath + java.io.File.separator)) {
+    if(!destinationFilePath.startsWith(destinationDirPath + File.separator)) {
       throw new IOException("Entry is outside of target directory: " + zipEntry.getName());
     }
     return destinationFile;
@@ -354,7 +363,7 @@ public class CloudCrossDriveManager {
 
   }
   private static void AddFileToUploadList(String filePath, String worldName) {
-    filesToUpload.add(new java.io.File(filePath));
+    filesToUpload.add(new File(filePath));
     worldNames.add(worldName);
   }
   private static String FindFileIdFromName(String name) {
@@ -411,5 +420,26 @@ public class CloudCrossDriveManager {
         System.out.println("Config not complete or incorrect");
       }
     }
+  }
+  private static String GetMostRecentCrash() {
+    String CrashReportName = "";
+    File WorldFolder = new File(CloudCrossConfig.worldPaths.get().get(0)).getParentFile();
+    File CrashesFolder = new File(WorldFolder.getParentFile().getAbsolutePath() + "\\crash-reports");
+    File MostRecentCrash = null;
+    long lastModifiedTime = 0;
+    try {
+      for (File f : CrashesFolder.listFiles()) {
+        if(f.lastModified() > lastModifiedTime) {
+          MostRecentCrash = f;
+          lastModifiedTime = f.lastModified();
+        }
+        System.out.println(f.getAbsolutePath());
+      }
+    }
+    catch(Exception e) {
+      System.out.println("No files in crash-report");
+    }
+    if(MostRecentCrash != null )CrashReportName = MostRecentCrash.getName();
+    return CrashReportName;
   }
 }
