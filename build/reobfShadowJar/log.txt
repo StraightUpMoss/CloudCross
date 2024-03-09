@@ -148,14 +148,14 @@ Adding Libraries to Inheritance
 Reading Input: C:\Users\Liama\OneDrive\Documents\GitHub\CloudCross\build\libs\cloudcross-0.0.1-1.20.2.jar
 Adding input to inheritance map
 Processing entries
+Can't Find Class: org/apache/log4j/Logger
+Can't Find Class: org/apache/log4j/Priority
+Can't Find Class: org/apache/log/Logger
+Can't Find Class: org/apache/log4j/Level
+Can't Find Class: org/apache/log/Hierarchy
 Can't Find Class: org/apache/avalon/framework/logger/Logger
 Can't Find Class: javax/servlet/ServletContextListener
 Can't Find Class: javax/servlet/ServletContextEvent
-Can't Find Class: org/apache/log/Logger
-Can't Find Class: org/apache/log/Hierarchy
-Can't Find Class: org/apache/log4j/Logger
-Can't Find Class: org/apache/log4j/Priority
-Can't Find Class: org/apache/log4j/Level
 Adding extras
 Sorting
 Writing Output: C:\Users\Liama\OneDrive\Documents\GitHub\CloudCross\build\reobfShadowJar\output.jar

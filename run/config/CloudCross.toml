@@ -15,7 +15,8 @@
 	"Max Backups" = 5
 	#Match array positions for each world file and complete all req for each property 
 	#Make sure to put a comma between each field ex: '',''
-	#Copy paste world path 
+	#Copy paste world path.
+	#Make sure for each backslash in the path you use two ex: \ 
 	"World Paths" = []
 	#World name in google drive MAKE SURE THIS IS DIFFERENT FOR EACH SAVED WORLD 
 	#Does not need to be the same as the actual world name in minercaft

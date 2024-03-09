@@ -23,7 +23,7 @@ public final class CloudCrossConfig {
         BUILDER.comment("\n\n");
         ccEnabled = BUILDER.comment("Do you want to enable cc on launch? (true/false)").define("ccEnabled", false);
         maxBackups = BUILDER.comment("Don't recommend to set to more than 5 if you have multiple worlds being saved or if you're too deep into the game\nCheck google drive space if you're worried").define("Max Backups", 5);
-        worldPaths = BUILDER.comment("Match array positions for each world file and complete all req for each property \nMake sure to put a comma between each field ex: '',''\nCopy paste world path ").define("World Paths", new ArrayList<>());
+        worldPaths = BUILDER.comment("Match array positions for each world file and complete all req for each property \nMake sure to put a comma between each field ex: '',''\nCopy paste world path.\nMake sure for each backslash in the path you use two ex: \\\\ ").define("World Paths", new ArrayList<>());
         worldNames = BUILDER.comment("World name in google drive MAKE SURE THIS IS DIFFERENT FOR EACH SAVED WORLD \nDoes not need to be the same as the actual world name in minercaft").define("World Names", new ArrayList<>());
         enabled = BUILDER.comment("Do you want this file to be uploaded and downloaded using CC \ntrue/false").define("World Status", new ArrayList<>());
         savedCrash = BUILDER.comment("DO NOT EDIT THIS. It's used to ensure that files are not overridden.").define("Most recent crash", new String());
