@@ -13,15 +13,7 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.FileList;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import net.minecraftforge.common.ForgeConfigSpec;
-
 import java.io.*;
-import java.lang.reflect.Executable;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -413,6 +405,7 @@ public class CloudCrossDriveManager {
 
    */
   private static void GatherConfigData(Boolean useToml) {
+    fileBackupLimit = CloudCrossConfig.maxBackups.get();
     for(int i = 0; i < CloudCrossConfig.worldPaths.get().size(); i++) {
       try {
         if (CloudCrossConfig.enabled.get().get(i)) AddFileToUploadList(CloudCrossConfig.worldPaths.get().get(i),
