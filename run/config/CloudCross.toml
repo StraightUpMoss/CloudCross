@@ -9,20 +9,20 @@
 	#
 	#
 	#Do you want to enable cc on launch? (true/false)
-	ccEnabled = true
+	ccEnabled = false
 	#Don't recommend to set to more than 5 if you have multiple worlds being saved or if you're too deep into the game
 	#Check google drive space if you're worried
 	"Max Backups" = 5
 	#Match array positions for each world file and complete all req for each property 
 	#Make sure to put a comma between each field ex: '',''
 	#Copy paste world path 
-	"World Paths" = ["C:\\Users\\virgi\\OneDrive\\Documents\\GitHub\\CloudCross\\run\\saves\\New World"]
+	"World Paths" = []
 	#World name in google drive MAKE SURE THIS IS DIFFERENT FOR EACH SAVED WORLD 
 	#Does not need to be the same as the actual world name in minercaft
-	"World Names" = ["NewConfigTest"]
+	"World Names" = []
 	#Do you want this file to be uploaded and downloaded using CC 
 	#true/false
-	"World Status" = [false]
+	"World Status" = []
 	#DO NOT EDIT THIS. It's used to ensure that files are not overridden.
-	"Most recent crash" = "crash-2024-03-07_12.59.32-fml.txt"
+	"Most recent crash" = ""
 

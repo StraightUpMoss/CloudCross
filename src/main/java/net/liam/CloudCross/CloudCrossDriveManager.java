@@ -418,6 +418,7 @@ public class CloudCrossDriveManager {
     }
   }
   private static String GetMostRecentCrash() {
+    if(CloudCrossConfig.worldPaths.get().size() == 0) return "";
     String CrashReportName = "";
     File WorldFolder = new File(CloudCrossConfig.worldPaths.get().get(0)).getParentFile();
     File CrashesFolder = new File(WorldFolder.getParentFile().getAbsolutePath() + "\\crash-reports");
